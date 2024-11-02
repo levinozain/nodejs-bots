@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('discord.js');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 const { EmbedBuilder } = require('discord.js');
+const { geminiToken } = require('../../config.json')
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -14,7 +15,7 @@ module.exports = {
 	async execute(interaction) {
 		await interaction.deferReply();
         
-        const genAI = new GoogleGenerativeAI("AIzaSyAPbJEicZ9EHys-zr_32q-XyAUVSTY099I");
+        const genAI = new GoogleGenerativeAI(geminiToken);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         let input = interaction.options.getString('input');
 
