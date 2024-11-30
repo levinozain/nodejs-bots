@@ -59,23 +59,6 @@ bot.on(Events.InteractionCreate, async interaction => {
 	}
 });
 
-bot.on(Events.MessageCreate, async (message) => {
-	if (message.channelId == "1007920696774639687" && message.guildId == "1007920639094571009"){
-		const genAI = new GoogleGenerativeAI(geminiToken);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-        let input = message.content;
-
-        const prompt = input;
-
-        const result = await model.generateContent(prompt);
-        const response = await result.response.text();
-
-		await message.deferReply();
-		await message.followUp(`${response}`);
-	}
-});
-
 bot.login(token);
 
 async function whatsapp() {
@@ -186,6 +169,57 @@ ngrok.connect({ addr: 25568, authtoken: tokenNgrok})
     
     //.then(listener => setupWebhook(`${listener.url()}`));
 //console.log(`Ingress established at: ${listener.url()}`);
+
+// REST API
+function restapi(){
+	const express = require("express")
+	const { MongoClient } = require('mongodb')
+	const mongodb = require('./dbconnect/mongodb.js')
+
+	const app = express()
+	app.use(express.json())
+
+	PORT = 19136
+
+	app.get('/',(req, res) =>{
+    	res.send(
+			{
+				'status': "ok"
+        	}
+    	)
+	})
+
+	app.get('/api/apod', async(req, res) =>{
+    	try{
+        	const data = await mongodb.coll.find({}).toArray()
+        	res.status(200).send(data)
+    	} catch(error){
+        	res.status(500).json({message: error.message})
+    	}
+	})
+	app.post('/api/apod', async(req, res) => {
+    	try {
+        	const data = await mongodb.coll.insertOne(req.body)
+        	res.status(200).json(data)
+    	} catch(error){
+        	res.status(500).json({message: error.message})
+    	}
+	})
+
+
+	const fileRouter = require('./api/routes/routes.js')
+
+	app.use('/api/apod', fileRouter)
+
+	app.listen(PORT, async() => {
+    	console.log('Ready!')
+	})
+
+}
+
+restapi()
+
+
 
 
 
